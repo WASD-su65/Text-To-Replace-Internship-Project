@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Replace Tool</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/text-replace-profile.css">
+    <style>
+        :root {
+            --primary-color: rgb(255,209,0);
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+            --text-color: #333333;
+            --text-secondary: rgb(84,88,89);
+            --hover-bg: #f8f9fa;
+            --success-color: #28a745;
+        }
+        
+        [data-theme="dark"] {
+            --primary-color: rgb(255,209,0);
+            --card-bg: #0f172a;
+            --border-color: #1f2937;
+            --text-color: #ffffff;
+            --text-secondary: #cbd5e1;
+            --hover-bg: #0e1a2b;
+            --success-color: #10b981;
+        }
+        
+        body {
+            font-family: "Noto Sans Thai", sans-serif;
+            background: var(--card-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        [data-theme="dark"] body {
+            background: #0b1220;
+        }
+        
+        header {
+            background: var(--card-bg);
+            color: var(--text-color);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 60px;
+        }
+        
+        [data-theme="dark"] header {
+            background: #101826;
+            border-bottom-color: #1f2937;
+        }
+        
+        header h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        header button {
+            background: var(--hover-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        header button:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            margin-top: 80px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+        
+        .tab-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-color);
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: #1f2937;
+            border-color: var(--primary-color);
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background: var(--hover-bg);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title .icon {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+        
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+        
+        .form-group input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.1);
+        }
+        
+        .history-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .history-item:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .history-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .history-details {
+            font-size: 14px;
+            color: var(--text-color);
+        }
+        
+        .history-stats {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .btn {
+            background: var(--primary-color);
+            color: #1f2937;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+        }
+        
+        .history-empty {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        
+        .file-upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            background: var(--card-bg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--primary-color);
+            background: var(--hover-bg);
+        }
+        
+        .file-upload-area.dragover {
+            border-color: var(--primary-color);
+            background: var(--hover-bg);
+            transform: scale(1.01);
+        }
+        
+        .upload-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .upload-text {
+            font-size: 16px;
+            color: var(--text-color);
+            margin-bottom: 8px;
+        }
+        
+        .upload-hint {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        
+        .file-list {
+            margin-top: 20px;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--card-bg);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+        
+        .file-item:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .file-icon {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+        
+        .file-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+        
+        .file-size {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-left: 8px;
+        }
+        
+        .remove-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .remove-btn:hover {
+            background: #dc2626;
+        }
+        
+        .btn:disabled {
+            background: var(--border-color);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .download-btn {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin: 0 auto;
+        }
+        
+        .download-btn:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+        
+        .download-btn::before {
+            content: "📥";
+            margin-right: 8px;
+        }
+        
+        .error-list {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid #ef4444;
+            color: var(--text-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+        
+        .error-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .error-list ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .error-list li {
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(239,68,68,0.2);
+        }
+        
+        .error-list li:last-child {
+            border-bottom: none;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .processing {
+            animation: pulse 1.5s infinite;
+        }
+        
+        .admin-history-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .admin-history-item.selected {
+            border-color: var(--primary-color);
+            background: rgba(255,209,0,0.1);
+        }
+        
+        .admin-history-item:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .admin-checkbox {
+            margin-right: 15px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .admin-item-content {
+            flex: 1;
+        }
+        
+        .admin-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+
+    </style>
+</head>
+<body>
+    <header>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <button id="btnSidebarToggle">☰</button>
+            <h1>Text Replace Tool</h1>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <input id="adminTokenInput" type="password" placeholder="Admin Token" style="padding: 6px 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 12px; width: 150px;">
+            <button id="btnAdminToggle">Enable</button>
+            <button id="btnTheme">🌙 Dark</button>
+            <div id="userProfile" style="margin-left: 8px;"></div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <button id="tabReplace" class="tab-btn active">แทนที่ข้อความ</button>
+            <button id="tabHistory" class="tab-btn">ประวัติการแก้ไข</button>
+            <button id="tabAdmin" class="tab-btn" style="display: none;">🔧 Admin</button>
+        </div>
+        
+        <div id="replaceTab" class="tab-content active">
+            <form id="textReplaceForm">
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <span class="icon">✏️</span>
+                        ข้อความที่ต้องการแทนที่
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="findText">ค้นหาข้อความ:</label>
+                        <input type="text" id="findText" name="find_text" required placeholder="ใส่ข้อความที่ต้องการค้นหา">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="replaceText">แทนที่ด้วย:</label>
+                        <input type="text" id="replaceText" name="replace_text" required placeholder="ใส่ข้อความที่ต้องการแทนที่">
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <span class="icon">📁</span>
+                        เลือกไฟล์
+                    </h3>
+                    
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</div>
+                        <div class="upload-hint">รองรับไฟล์ .docx และ .xlsx (สูงสุด 50 ไฟล์, ไฟล์ละไม่เกิน 10MB)</div>
+                        <input type="file" id="fileInput" multiple accept=".docx,.xlsx" style="display: none;">
+                    </div>
+                    
+                    <div class="file-list" id="fileList"></div>
+                </div>
+                
+                <button type="submit" class="btn" id="processBtn" disabled style="width: 100%; padding: 14px; font-size: 16px; margin-top: 20px;">
+                    <span style="margin-right: 8px;">🚀</span>
+                    เริ่มแทนที่ข้อความ
+                </button>
+            </form>
+            
+            <div class="progress-section" id="progressSection" style="display: none; text-align: center; padding: 25px; background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border-color); margin-top: 20px;">
+                <div class="progress-title" style="font-size: 18px; color: var(--text-color); margin-bottom: 20px;">กำลังประมวลผล...</div>
+                <div class="progress-bar" style="width: 100%; height: 6px; background: var(--border-color); border-radius: 3px; overflow: hidden; margin-bottom: 16px;">
+                    <div class="progress-fill" id="progressFill" style="height: 100%; background: var(--primary-color); width: 0%; transition: width 0.3s ease; border-radius: 3px;"></div>
+                </div>
+                <div class="progress-text" id="progressText" style="color: var(--text-secondary); font-size: 14px;">เตรียมการ...</div>
+            </div>
+            
+            <div class="results-section" id="resultsSection" style="display: none; margin-top: 25px; text-align: center;">
+                <div class="result-summary" id="resultSummary" style="background: rgba(16,185,129,0.1); border: 1px solid var(--success-color); color: var(--text-color); padding: 20px; border-radius: 8px; margin-bottom: 20px;"></div>
+                <div id="fileDetails" style="margin-bottom: 20px;"></div>
+                <div id="errorList"></div>
+            </div>
+        </div>
+        
+        <div id="historyTab" class="tab-content">
+            <div class="form-section">
+                <h3 class="section-title">
+                    <span class="icon">📅</span>
+                    ประวัติการแก้ไข
+                </h3>
+                
+                <div id="historyList">
+                    <div class="history-empty">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📄</div>
+                        <div>ยังไม่มีประวัติการแก้ไข</div>
+                        <div style="font-size: 12px; margin-top: 8px;">เริ่มแทนที่ข้อความเพื่อดูประวัติ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="adminTab" class="tab-content">
+            <div class="form-section">
+                <h3 class="section-title">
+                    <span class="icon">🔧</span>
+                    จัดการระบบ (Admin)
+                </h3>
+                
+                <div id="adminControls" style="margin-bottom: 20px; display: none;">
+                    <button id="btnRefreshAdmin" class="btn" style="margin-right: 10px;">
+                        🔄 รีเฟรช
+                    </button>
+                    <button id="btnSelectAll" class="btn" style="margin-right: 10px;">
+                        ☑️ เลือกทั้งหมด
+                    </button>
+                    <button id="btnDeselectAll" class="btn" style="margin-right: 10px;">
+                        ☐ ยกเลิกทั้งหมด
+                    </button>
+                    <button id="btnDeleteSelected" class="btn btn-danger" disabled>
+                        🗑️ ลบที่เลือก
+                    </button>
+                </div>
+                
+                <div id="adminHistoryList">
+                    <div class="history-empty">
+                        <div style="font-size: 48px; margin-bottom: 16px;">🔒</div>
+                        <div>กรุณาเข้าสู่ระบบ Admin ก่อน</div>
+                    </div>
+                </div>
+                
+                <div id="storageStatus" style="margin-top: 20px; padding: 15px; background: var(--hover-bg); border-radius: 8px; display: none;">
+                    <h4>สถานะพื้นที่จัดเก็บ</h4>
+                    <div id="storageInfo"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Modules -->
+    <script src="/static/js/auth.utils.js"></script>
+    <script src="/static/js/text-replace.results.js"></script>
+    <script src="/static/js/text-replace.theme.js"></script>
+    <script src="/static/js/text-replace.tabs.js"></script>
+    <script src="/static/js/text-replace.history.js"></script>
+    <script src="/static/js/text-replace.fileupload.js"></script>
+    <script src="/static/js/text-replace.form.js"></script>
+    <script src="/static/js/text-replace.admin.js"></script>
+    <script src="/static/js/text-replace.main.js"></script>
+    <script>
+        // Initialize user profile
+        document.addEventListener('DOMContentLoaded', () => {
+            const userProfileElement = document.getElementById('userProfile');
+            if (userProfileElement && AuthManager.isAuthenticated()) {
+                userProfileElement.innerHTML = AuthManager.createUserProfile();
+            }
+        });
+    </script>
+</body>
+</html>
